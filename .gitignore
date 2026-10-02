@@ -75,7 +75,7 @@ Thumbs.db
 # MongoDB
 *.mongodb
 mongodb/
-
+aws/
 terraform/.terraform/*
 terraform/terra-key.pub
 terraform/terra-key

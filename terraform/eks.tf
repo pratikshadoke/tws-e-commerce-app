@@ -22,16 +22,12 @@ module "eks" {
   subnet_ids               = module.vpc.public_subnets
   control_plane_subnet_ids = module.vpc.intra_subnets
 
-  # EKS Managed Node Group(s)
-
   eks_managed_node_group_defaults = {
 
-    instance_types = ["t2.large"]
+    instance_types = ["m7i-flex.large"]
 
     attach_cluster_primary_security_group = true
-
   }
-
 
   eks_managed_node_groups = {
 
@@ -40,23 +36,35 @@ module "eks" {
       max_size     = 3
       desired_size = 2
 
-      instance_types = ["t2.large"]
-      capacity_type  = "SPOT"
+instance_types = ["m7i-flex.large"]
+capacity_type  = "ON_DEMAND"
 
-      disk_size = 35 
-      use_custom_launch_template = false  # Important to apply disk size!
+      disk_size = 35
+      use_custom_launch_template = false
 
       tags = {
-        Name = "tws-demo-ng"
+        Name        = "tws-demo-ng"
         Environment = "dev"
-        ExtraTag = "e-commerce-app"
+        ExtraTag    = "e-commerce-app"
       }
     }
   }
- 
+
+  # NodePort ingress rule
+  node_security_group_additional_rules = {
+
+    ingress_nodeport_tcp = {
+      description = "Allow NodePort TCP"
+      protocol    = "tcp"
+      from_port   = 30000
+      to_port     = 32767
+      type        = "ingress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  }
+
   tags = local.tags
-
-
 }
 
 data "aws_instances" "eks_nodes" {
